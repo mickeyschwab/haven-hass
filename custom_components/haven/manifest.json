@@ -1,12 +1,11 @@
 {
   "domain": "haven",
   "name": "Haven Lighting",
-  "documentation": "https://github.com/mickeyschwab/haven-hass",
-  "issue_tracker": "https://github.com/mickeyschwab/haven-hass/issues",
-  "dependencies": [],
   "codeowners": ["@mickeyschwab"],
-  "requirements": ["havenlighting>=0.1.1"],
+  "config_flow": true,
+  "documentation": "https://github.com/mickeyschwab/haven-hass",
   "iot_class": "cloud_polling",
-  "version": "0.1.1",
-  "config_flow": true
+  "issue_tracker": "https://github.com/mickeyschwab/haven-hass/issues",
+  "requirements": ["havenlighting>=0.1.1"],
+  "version": "0.1.1"
 } 
