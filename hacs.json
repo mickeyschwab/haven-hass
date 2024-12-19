@@ -1,8 +1,3 @@
 {
-  "name": "Haven Lighting",
-  "render_readme": true,
-  "domain": "haven",
-  "documentation": "https://github.com/mickeyschwab/haven-hass",
-  "issue_tracker": "https://github.com/mickeyschwab/haven-hass/issues",
-  "homeassistant": "2023.8.0"
+  "name": "Haven Lighting"
 } 
