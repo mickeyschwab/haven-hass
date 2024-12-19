@@ -8,6 +8,5 @@
   "requirements": ["havenlighting>=0.1.1"],
   "iot_class": "cloud_polling",
   "version": "0.1.1",
-  "config_flow": true,
-  "homeassistant": "2023.8.0"
+  "config_flow": true
 } 
