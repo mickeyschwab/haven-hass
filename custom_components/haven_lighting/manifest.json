@@ -1,5 +1,5 @@
 {
-  "domain": "haven",
+  "domain": "haven_lighting",
   "name": "Haven Lighting",
   "codeowners": ["@mickeyschwab"],
   "config_flow": true,
