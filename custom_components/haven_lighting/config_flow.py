@@ -13,9 +13,9 @@ from homeassistant.data_entry_flow import FlowResult
 from havenlighting import HavenClient
 from havenlighting.exceptions import AuthenticationError
 
-_LOGGER = logging.getLogger(__name__)
+from .const import DOMAIN
 
-DOMAIN = "haven"
+_LOGGER = logging.getLogger(__name__)
 
 class HavenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Haven Lighting."""

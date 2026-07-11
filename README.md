@@ -22,7 +22,7 @@ This integration allows you to control Haven Lighting devices through Home Assis
 
 ### Manual Installation
 
-1. Copy the `haven` folder from `custom_components` to your Home Assistant's `custom_components` directory
+1. Copy the `haven_lighting` folder from `custom_components` to your Home Assistant's `custom_components` directory
 2. Restart Home Assistant
 
 ## Configuration
