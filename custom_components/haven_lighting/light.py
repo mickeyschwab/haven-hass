@@ -1,72 +1,82 @@
 """Platform for Haven light integration."""
 from __future__ import annotations
 
-import logging
 from typing import Any
 
-from homeassistant.components.light import (
-    ColorMode,
-    LightEntity,
-)
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.components.light import ColorMode, LightEntity
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from havenlighting import HavenClient
 from .const import DOMAIN
-
-_LOGGER = logging.getLogger(__name__)
+from .coordinator import HavenConfigEntry, HavenCoordinator
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    config_entry: ConfigEntry,
+    config_entry: HavenConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Haven Light from a config entry."""
-    client: HavenClient = hass.data[DOMAIN][config_entry.entry_id]
-    
-    # Discover locations and lights
-    locations = await hass.async_add_executor_job(client.discover_locations)
-    
-    entities = []
-    for location in locations.values():
-        lights = await hass.async_add_executor_job(location.get_lights)
-        for light in lights.values():
-            entities.append(HavenLight(light, location))
-    
-    async_add_entities(entities)
+    coordinator = config_entry.runtime_data
+    location = coordinator.location
 
-class HavenLight(LightEntity):
+    device_registry = dr.async_get(hass)
+    device_registry.async_get_or_create(
+        config_entry_id=config_entry.entry_id,
+        identifiers={(DOMAIN, str(location.id))},
+        manufacturer="Haven",
+        name=location.name,
+        model="Haven Location",
+    )
+
+    async_add_entities(
+        HavenLight(coordinator, light_id) for light_id in coordinator.data
+    )
+
+class HavenLight(CoordinatorEntity[HavenCoordinator], LightEntity):
     """Representation of a Haven Light."""
 
     _attr_has_entity_name = True
     _attr_color_mode = ColorMode.ONOFF
     _attr_supported_color_modes = {ColorMode.ONOFF}
 
-    def __init__(self, light, location) -> None:
+    def __init__(self, coordinator: HavenCoordinator, light_id: int) -> None:
         """Initialize a Haven Light."""
-        self._light = light
-        self._location = location
-        self._attr_unique_id = f"haven_light_{light.id}"
-        self._attr_name = light.name
+        super().__init__(coordinator, context=light_id)
+        self._light_id = light_id
+        light = coordinator.data[light_id]
+        self._attr_unique_id = f"haven_light_{light_id}"
+        # None, not light.name: this entity is the device's only feature, so
+        # has_entity_name + a device name would otherwise show "Kitchen Kitchen".
+        self._attr_name = None
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, str(light.id))},
+            identifiers={(DOMAIN, str(light_id))},
             name=light.name,
             manufacturer="Haven",
             model="Haven Light",
-            via_device=(DOMAIN, str(location._location_id)),
+            via_device=(DOMAIN, str(coordinator.location.id)),
         )
+
+    @property
+    def available(self) -> bool:
+        """Return True if the light is still reported by the coordinator."""
+        return super().available and self._light_id in self.coordinator.data
 
     @property
     def is_on(self) -> bool:
         """Return true if light is on."""
-        return self._light.is_on
+        return self.coordinator.data[self._light_id].is_on
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the light on."""
-        await self.hass.async_add_executor_job(self._light.turn_on)
+        light = self.coordinator.data[self._light_id]
+        await self.hass.async_add_executor_job(light.turn_on)
+        await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the light off."""
-        await self.hass.async_add_executor_job(self._light.turn_off) 
+        light = self.coordinator.data[self._light_id]
+        await self.hass.async_add_executor_job(light.turn_off)
+        await self.coordinator.async_request_refresh()
