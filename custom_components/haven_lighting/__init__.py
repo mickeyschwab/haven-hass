@@ -7,8 +7,9 @@ from homeassistant.core import HomeAssistant
 
 from havenlighting import HavenClient
 
+from .const import DOMAIN
+
 PLATFORMS: list[Platform] = [Platform.LIGHT]
-DOMAIN = "haven"
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Haven Lighting from a config entry."""

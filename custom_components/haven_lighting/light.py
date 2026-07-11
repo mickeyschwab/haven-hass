@@ -5,7 +5,6 @@ import logging
 from typing import Any
 
 from homeassistant.components.light import (
-    ATTR_BRIGHTNESS,
     ColorMode,
     LightEntity,
 )
@@ -15,7 +14,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
 
 from havenlighting import HavenClient
-from . import DOMAIN
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,8 +41,8 @@ class HavenLight(LightEntity):
     """Representation of a Haven Light."""
 
     _attr_has_entity_name = True
-    _attr_color_mode = ColorMode.BRIGHTNESS
-    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
+    _attr_color_mode = ColorMode.ONOFF
+    _attr_supported_color_modes = {ColorMode.ONOFF}
 
     def __init__(self, light, location) -> None:
         """Initialize a Haven Light."""
@@ -63,11 +62,6 @@ class HavenLight(LightEntity):
     def is_on(self) -> bool:
         """Return true if light is on."""
         return self._light.is_on
-
-    @property
-    def brightness(self) -> int:
-        """Return the brightness of this light between 0..255."""
-        return int(self._light._data.brightness * 4)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the light on."""
