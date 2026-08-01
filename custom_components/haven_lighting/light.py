@@ -73,10 +73,16 @@ class HavenLight(CoordinatorEntity[HavenCoordinator], LightEntity):
         """Turn the light on."""
         light = self.coordinator.data[self._light_id]
         await self.hass.async_add_executor_job(light.turn_on)
-        await self.coordinator.async_request_refresh()
+        self.async_write_ha_state()
+        self.hass.async_create_task(
+            self.coordinator.async_request_refresh(), eager_start=True
+        )
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the light off."""
         light = self.coordinator.data[self._light_id]
         await self.hass.async_add_executor_job(light.turn_off)
-        await self.coordinator.async_request_refresh()
+        self.async_write_ha_state()
+        self.hass.async_create_task(
+            self.coordinator.async_request_refresh(), eager_start=True
+        )
