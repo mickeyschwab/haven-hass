@@ -23,7 +23,7 @@ async def async_setup_entry(
     location = coordinator.location
 
     device_registry = dr.async_get(hass)
-    device_registry.async_get_or_create(
+    location_device = device_registry.async_get_or_create(
         config_entry_id=config_entry.entry_id,
         identifiers={(DOMAIN, str(location.id))},
         manufacturer="Haven",
@@ -32,7 +32,8 @@ async def async_setup_entry(
     )
 
     async_add_entities(
-        HavenLight(coordinator, light_id) for light_id in coordinator.data
+        HavenLight(coordinator, light_id, location_device.id)
+        for light_id in coordinator.data
     )
 
 class HavenLight(CoordinatorEntity[HavenCoordinator], LightEntity):
@@ -42,7 +43,9 @@ class HavenLight(CoordinatorEntity[HavenCoordinator], LightEntity):
     _attr_color_mode = ColorMode.ONOFF
     _attr_supported_color_modes = {ColorMode.ONOFF}
 
-    def __init__(self, coordinator: HavenCoordinator, light_id: int) -> None:
+    def __init__(
+        self, coordinator: HavenCoordinator, light_id: int, location_device_id: str
+    ) -> None:
         """Initialize a Haven Light."""
         super().__init__(coordinator, context=light_id)
         self._light_id = light_id
@@ -56,7 +59,7 @@ class HavenLight(CoordinatorEntity[HavenCoordinator], LightEntity):
             name=light.name,
             manufacturer="Haven",
             model="Haven Light",
-            via_device=(DOMAIN, str(coordinator.location.id)),
+            via_device_id=location_device_id,
         )
 
     @property
